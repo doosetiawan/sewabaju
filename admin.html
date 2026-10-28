@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Keyshafanie Gallery</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Outfit', 'sans-serif'] },
+                    colors: { brand: { 900: '#0f172a', 800: '#1e293b', accent: '#d97706' } }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans antialiased">
+
+    <div class="flex min-h-screen">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="w-64 bg-brand-900 text-white p-6 hidden md:flex flex-col justify-between shrink-0">
+            <div class="space-y-8">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-amber-500 text-slate-900 rounded-xl flex items-center justify-center font-bold text-xl">K</div>
+                    <div>
+                        <h2 class="font-bold text-lg leading-tight">Keyshafanie</h2>
+                        <span class="text-xs text-amber-400 font-medium">Panel Kelola Baju</span>
+                    </div>
+                </div>
+
+                <nav class="space-y-2">
+                    <a href="#" class="flex items-center gap-3 px-4 py-3 bg-slate-800 text-amber-400 font-semibold rounded-xl text-sm">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                        Kelola Katalog & Stok
+                    </a>
+                    <a href="index.html" target="_blank" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white rounded-xl text-sm transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                        Lihat Halaman Utama
+                    </a>
+                </nav>
+            </div>
+
+            <div class="text-xs text-slate-500 border-t border-slate-800 pt-4">
+                Keyshafanie Gallery v1.0 &copy; 2026
+            </div>
+        </aside>
+
+        <!-- Main Content area -->
+        <main class="flex-1 p-6 lg:p-10 overflow-x-hidden">
+            
+            <!-- Top Dashboard Bar -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                <div>
+                    <h1 class="text-2xl lg:text-3xl font-bold text-slate-900">Manajemen Baju & Status Sewa</h1>
+                    <p class="text-sm text-slate-500">Update status ketersediaan atau tanggal penyewaan baju di sini.</p>
+                </div>
+                <button onclick="openModal()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-5 py-2.5 rounded-xl text-sm flex items-center gap-2 shadow-sm transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    Tambah Baju Baru
+                </button>
+            </div>
+
+            <!-- Stats Overview -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Baju</p>
+                    <p class="text-3xl font-bold text-slate-900 mt-1" id="stat-total">0</p>
+                </div>
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <p class="text-xs font-bold text-emerald-600 uppercase tracking-wider">Ready Stock (Hari Ini)</p>
+                    <p class="text-3xl font-bold text-emerald-600 mt-1" id="stat-ready">0</p>
+                </div>
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <p class="text-xs font-bold text-red-500 uppercase tracking-wider">Sedang Disewa (Hari Ini)</p>
+                    <p class="text-3xl font-bold text-red-500 mt-1" id="stat-booked">0</p>
+                </div>
+            </div>
+
+            <!-- Table Kelola Stok Baju -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                    <h3 class="font-bold text-slate-900">Daftar Katalog Baju Gallery</h3>
+                    <input type="text" id="admin-search" oninput="renderAdminTable()" placeholder="Cari kode / nama baju..." class="border border-slate-200 text-xs rounded-xl px-3 py-2 w-64 focus:outline-none focus:border-amber-500">
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-wider border-b border-slate-100">
+                                <th class="py-3.5 px-6">Baju</th>
+                                <th class="py-3.5 px-6">Kode Baju</th>
+                                <th class="py-3.5 px-6">Kategori / Tema</th>
+                                <th class="py-3.5 px-6">Status Hari Ini</th>
+                                <th class="py-3.5 px-6">Jadwal Tanggal Disewa</th>
+                                <th class="py-3.5 px-6 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-table-body" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Modal Form Tambah / Edit Baju -->
+    <div id="baju-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 class="text-lg font-bold text-slate-900" id="modal-title">Tambah Baju Baru</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 font-bold">&times;</button>
+            </div>
+
+            <form id="baju-form" onsubmit="saveBaju(event)" class="space-y-4">
+                <input type="hidden" id="form-id">
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Kode Baju</label>
+                        <input type="text" id="form-code" required placeholder="misal: 01" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Kategori Usia</label>
+                        <select id="form-maincat" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-amber-500">
+                            <option value="anak-laki">Anak Laki-Laki</option>
+                            <option value="anak-perempuan">Anak Perempuan</option>
+                            <option value="remaja-laki">Remaja Laki-Laki</option>
+                            <option value="remaja-perempuan">Remaja Perempuan</option>
+                            <option value="dewasa-laki">Dewasa Laki-Laki</option>
+                            <option value="dewasa-perempuan">Dewasa Perempuan</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Nama Busana</label>
+                    <input type="text" id="form-title" required placeholder="misal: Baju Adat Jawa Solo" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-amber-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Sub-Kategori / Tema</label>
+                        <select id="form-subcat" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-amber-500">
+                            <option value="adat">Adat Nusantara</option>
+                            <option value="formal">Formal & Gaun/Jas</option>
+                            <option value="profesi">Profesi & Cita-cita</option>
+                            <option value="drumband">Drumband & Mayoret</option>
+                            <option value="tari">Tari Tradisional</option>
+                            <option value="karnaval">Karnaval & Karakter</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">URL Foto Baju</label>
+                        <input type="text" id="form-img" required placeholder="https://..." class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-amber-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Tambah Tanggal Disewa (Pisahkan Koma)</label>
+                    <input type="text" id="form-dates" placeholder="2026-10-28, 2026-11-05" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-amber-500">
+                    <p class="text-[11px] text-slate-400 mt-1">Format: YYYY-MM-DD (Gunakan koma jika disewa beberapa tanggal).</p>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl">Batal</button>
+                    <button type="submit" class="px-5 py-2 text-sm font-bold bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-xl">Simpan Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript Admin Logic -->
+    <script>
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        // Shared Prototype Data
+        let adminProducts = [
+            { id: 1, code: "01", title: "Baju Adat Minang Suntiang Anak", mainCat: "anak-perempuan", mainCatLabel: "Anak Perempuan", subCat: "adat", subCatLabel: "Adat Nusantara", img: "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=600&q=80", bookedDates: [todayStr, "2026-11-05"] },
+            { id: 2, code: "02", title: "Beskap Jawa Solo Brokat Anak", mainCat: "anak-laki", mainCatLabel: "Anak Laki-Laki", subCat: "adat", subCatLabel: "Adat Nusantara", img: "https://images.unsplash.com/photo-1596464716127-f2a82984de30?auto=format&fit=crop&w=600&q=80", bookedDates: [] },
+            { id: 3, code: "03", title: "Kostum Mayoret Royal Red Gold", mainCat: "anak-perempuan", mainCatLabel: "Anak Perempuan", subCat: "drumband", subCatLabel: "Drumband & Mayoret", img: "https://images.unsplash.com/photo-1551886866-41f237efab52?auto=format&fit=crop&w=600&q=80", bookedDates: ["2026-11-10"] },
+            { id: 4, code: "04", title: "Seragam Pilot Cilik Lengkap", mainCat: "anak-laki", mainCatLabel: "Anak Laki-Laki", subCat: "profesi", subCatLabel: "Profesi & Cita-cita", img: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=600&q=80", bookedDates: [todayStr] },
+            { id: 5, code: "05", title: "Gaun Pesta Ballgown Rose Silk", mainCat: "dewasa-perempuan", mainCatLabel: "Dewasa Perempuan", subCat: "formal", subCatLabel: "Formal & Gaun/Jas", img: "https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?auto=format&fit=crop&w=600&q=80", bookedDates: [] }
+        ];
+
+        function updateStats() {
+            document.getElementById('stat-total').innerText = adminProducts.length;
+            const bookedToday = adminProducts.filter(p => p.bookedDates.includes(todayStr)).length;
+            document.getElementById('stat-booked').innerText = bookedToday;
+            document.getElementById('stat-ready').innerText = adminProducts.length - bookedToday;
+        }
+
+        function renderAdminTable() {
+            const query = document.getElementById('admin-search').value.toLowerCase();
+            const tbody = document.getElementById('admin-table-body');
+
+            const filtered = adminProducts.filter(p => p.title.toLowerCase().includes(query) || p.code.toLowerCase().includes(query));
+
+            tbody.innerHTML = filtered.map(p => {
+                const isBookedToday = p.bookedDates.includes(todayStr);
+
+                return `
+                <tr class="hover:bg-slate-50 transition">
+                    <td class="py-3 px-6 flex items-center gap-3">
+                        <img src="${p.img}" class="w-10 h-12 object-cover rounded-lg border border-slate-200">
+                        <span class="font-bold text-slate-900">${p.title}</span>
+                    </td>
+                    <td class="py-3 px-6">
+                        <span class="bg-slate-100 text-slate-800 font-bold px-2.5 py-1 rounded-md text-xs border border-slate-200">No. ${p.code}</span>
+                    </td>
+                    <td class="py-3 px-6 text-xs text-slate-500">
+                        <div class="font-semibold text-slate-700">${p.mainCatLabel}</div>
+                        <div>${p.subCatLabel}</div>
+                    </td>
+                    <td class="py-3 px-6">
+                        <button onclick="toggleTodayStatus(${p.id})" class="px-3 py-1 rounded-full text-xs font-bold transition flex items-center gap-1.5 ${isBookedToday ? 'bg-red-100 text-red-700 hover:bg-red-200' : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'}">
+                            <span class="w-1.5 h-1.5 rounded-full ${isBookedToday ? 'bg-red-600' : 'bg-emerald-600'}"></span>
+                            ${isBookedToday ? 'Sedang Disewa' : 'Ready Stock'}
+                        </button>
+                    </td>
+                    <td class="py-3 px-6 text-xs font-mono text-slate-600">
+                        ${p.bookedDates.length > 0 ? p.bookedDates.join(', ') : '<span class="text-slate-400 italic">Belum ada jadwal</span>'}
+                    </td>
+                    <td class="py-3 px-6 text-right space-x-2">
+                        <button onclick="editBaju(${p.id})" class="text-xs font-semibold text-amber-600 hover:text-amber-800">Edit</button>
+                        <button onclick="deleteBaju(${p.id})" class="text-xs font-semibold text-red-600 hover:text-red-800">Hapus</button>
+                    </td>
+                </tr>
+                `;
+            }).join('');
+
+            updateStats();
+        }
+
+        function toggleTodayStatus(id) {
+            const prod = adminProducts.find(p => p.id === id);
+            if (prod) {
+                if (prod.bookedDates.includes(todayStr)) {
+                    prod.bookedDates = prod.bookedDates.filter(d => d !== todayStr);
+                } else {
+                    prod.bookedDates.push(todayStr);
+                }
+                renderAdminTable();
+            }
+        }
+
+        function openModal(editId = null) {
+            document.getElementById('baju-modal').classList.remove('hidden');
+            if (editId) {
+                const p = adminProducts.find(item => item.id === editId);
+                document.getElementById('modal-title').innerText = 'Edit Data Baju';
+                document.getElementById('form-id').value = p.id;
+                document.getElementById('form-code').value = p.code;
+                document.getElementById('form-title').value = p.title;
+                document.getElementById('form-maincat').value = p.mainCat;
+                document.getElementById('form-subcat').value = p.subCat;
+                document.getElementById('form-img').value = p.img;
+                document.getElementById('form-dates').value = p.bookedDates.join(', ');
+            } else {
+                document.getElementById('modal-title').innerText = 'Tambah Baju Baru';
+                document.getElementById('baju-form').reset();
+                document.getElementById('form-id').value = '';
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('baju-modal').classList.add('hidden');
+        }
+
+        function saveBaju(e) {
+            e.preventDefault();
+            const id = document.getElementById('form-id').value;
+            const code = document.getElementById('form-code').value;
+            const title = document.getElementById('form-title').value;
+            const mainCat = document.getElementById('form-maincat').value;
+            const subCat = document.getElementById('form-subcat').value;
+            const img = document.getElementById('form-img').value;
+            const rawDates = document.getElementById('form-dates').value;
+
+            const datesArray = rawDates ? rawDates.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+            if (id) {
+                const p = adminProducts.find(item => item.id == id);
+                p.code = code; p.title = title; p.mainCat = mainCat; p.subCat = subCat; p.img = img; p.bookedDates = datesArray;
+            } else {
+                adminProducts.push({
+                    id: Date.now(),
+                    code, title, mainCat, subCat, img,
+                    mainCatLabel: mainCat, subCatLabel: subCat,
+                    bookedDates: datesArray
+                });
+            }
+
+            closeModal();
+            renderAdminTable();
+        }
+
+        function editBaju(id) { openModal(id); }
+
+        function deleteBaju(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus baju ini dari katalog?')) {
+                adminProducts = adminProducts.filter(p => p.id !== id);
+                renderAdminTable();
+            }
+        }
+
+        renderAdminTable();
+    </script>
+</body>
+</html>
